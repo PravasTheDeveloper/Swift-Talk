@@ -82,9 +82,9 @@ function SliderSearchPerson() {
         console.log(data)
         soket.emit("new messege", data)
 
-        // if (status === 200) {
-        //     dispatch(fetchMessege(chatId))
-        // }
+        if (status === 200) {
+            setcontent("")
+        }
     }
 
     selectedChatCompare = SelectedChat._id
@@ -98,7 +98,7 @@ function SliderSearchPerson() {
             if (!selectedChatCompare || selectedChatCompare !== newMessageReceived.chat._id) {
                 console.log(`Notificate :::: `, newMessageReceived);
             } else {
-                setSelectedChatMessege([...SelectedChatMessege, newMessageReceived])
+                setSelectedChatMessege((prev) => [...prev, newMessageReceived])
 
                 if (newMessageReceived.sender !== UserData._id) {
                     setDataDispatched(true);
@@ -116,7 +116,7 @@ function SliderSearchPerson() {
     console.log(SelectedChatMessege)
     return (
         <>
-            <div className='flex-1 h-full relative flex'>
+            <div className='flex-1 h-full relative flex overflow-hidden'>
                 <div className='xl:w-[350px] lg:w-[300px] sm:w-[250px] left-[-1000px] lg:left-0 h-full bg-slate-700 border-slate-900 border-r flex flex-col'>
                     <div className='w-full h-[60px] flex justify-center items-center px-5'>
                         <input type="text" className='h-[40px] w-full rounded bg-slate-500 px-2 text-sm text-white outline-none' placeholder='Search People' onFocus={() => { dispatch(openSearchSlider()) }} />
@@ -192,21 +192,21 @@ function SliderSearchPerson() {
                                         </div>
                                     </div>
                                 </div>
-                                <div className='flex-1 overflow-scroll'>
-                                    <ScrollableFeed>
-                                        {
-                                            SelectedChatMessege.map((data, index) => {
-                                                return (
-                                                    <div key={index} className={`w-full h-auto bg-red-500 mb-2 flex ${data.sender === UserData._id ? "justify-end" : "justify-start"} px-3`}>
-                                                        <div className='w-auto bg-cyan-500 py-2 px-4 rounded-full'>
-                                                            {data.content}
-                                                        </div>
+
+                                <ScrollableFeed className='flex-1 Show__Chatting__Data my-5'>
+                                    {
+                                        SelectedChatMessege.map((data, index) => {
+                                            return (
+                                                <div key={index} className={`w-full h-auto mb-2 flex ${data.sender._id === UserData._id ? "justify-end" : "justify-start"} text-white px-3`}>
+                                                    <div className={`w-auto bg-cyan-500 ${data.sender._id === UserData._id ? "bg-cyan-600 " : "bg-slate-700 "} py-2 px-4 rounded-full`}>
+                                                        {data.content}
                                                     </div>
-                                                )
-                                            })
-                                        }
-                                    </ScrollableFeed>
-                                </div>
+                                                </div>
+                                            )
+                                        })
+                                    }
+                                </ScrollableFeed>
+
                                 <div className='w-full h-14 min-h-14 bg-slate-500 flex items-center px-5'>
                                     <div className='w-11 h-11 bg-slate-400 rounded-full flex justify-center items-center text-2xl'>
                                         <GrAttachment />
@@ -215,10 +215,10 @@ function SliderSearchPerson() {
                                         <BsEmojiSmile />
                                     </div>
                                     <div className='flex-1 h-full py-2 '>
-                                        <input className='w-full h-full bg-slate-300 rounded-full outline-none px-4' placeholder='Type Messege' onChange={(e) => { setcontent(e.target.value) }} type="text" />
+                                        <input className='w-full h-full bg-slate-300 rounded-full outline-none px-4' placeholder='Type Messege' value={content} onChange={(e) => { setcontent(e.target.value) }} type="text" />
                                     </div>
 
-                                    <div className='w-11 h-11 bg-slate-800 rounded-full ml-5 flex justify-center items-center text-2xl text-white' onClick={SentChattingData}>
+                                    <div className='w-11 h-11 bg-slate-800 hover:bg-slate-300 hover:text-black cursor-pointer duration-200 rounded-full ml-5 flex justify-center items-center text-2xl text-white' onClick={SentChattingData}>
                                         <AiOutlineSend />
                                     </div>
                                 </div>

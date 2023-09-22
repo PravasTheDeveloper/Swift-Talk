@@ -20,7 +20,7 @@ function HomePage() {
     }, [])
 
     if (userData.status === 200) {
-        navigate("/chat")
+        // navigate("/chat")
     } else {
     }
 

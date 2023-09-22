@@ -10,7 +10,7 @@ const sendMessege = async (req, res) => {
             content: content,
             chat: chatId
         }).populate("chat")
-            // 
+        // 
 
 
         const savedmsg = await messegeSave.save();
@@ -23,7 +23,7 @@ const sendMessege = async (req, res) => {
 
 
         res.status(200).send(messege);
-        
+
     } catch (err) {
         res.status(400).json({ err })
         console.log(err)
@@ -34,7 +34,7 @@ const fetchAllMessege = async (req, res) => {
     try {
 
         const findMessege = await Messege.find({ chat: req.params.chatId })
-            .populate("chat");
+            .populate("chat").populate("sender")
 
         res.send(findMessege)
 

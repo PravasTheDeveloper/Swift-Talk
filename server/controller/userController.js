@@ -58,10 +58,10 @@ const userLogIn = async (req, res) => {
                 const isMatch = await bcrypt.compare(password, userLogin.password);
                 const token = await userLogin.generateAuthToken();
 
-                // const cookie = res.cookie("jwtoken", token, {
-                //     expires: new Date(Date.now() + 25892000000),
-                //     httpOnly: true
-                // })P
+                const cookie = res.cookie("jwtoken", token, {
+                    expires: new Date(Date.now() + 25892000000),
+                    httpOnly: true
+                })
 
                 if (isMatch) {
                     res.status(200).json({ messege: "LOGIN SUCCESSFULL" });
@@ -81,8 +81,9 @@ const userLogIn = async (req, res) => {
 }
 
 const userDetails = async (req, res) => {
-    res.send(req.rootUser)
-    // console.log(req.rootUser)
+    res.status(400).json({ messege: "Something went Wrong" })
+    res.status(200).send(req.rootUser)
+
 }
 
 // Find User

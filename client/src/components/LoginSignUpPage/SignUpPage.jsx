@@ -1,17 +1,20 @@
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { RotatingLines } from 'react-loader-spinner';
 import AlertTost from '../AleartTost/AlertTost';
 import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
+import AvatarEditor from 'react-avatar-editor';
 
 
 function SignUpPage() {
 
     const navigate = useNavigate()
 
-    const [pics, setpics] = useState()
+    const [Pics, setPics] = useState()
     const [loading, setloading] = useState(false)
+    const [editor, setEditor] = useState(null);
+    const editorRef = useRef(null);
 
     const [UserDetails, setUserDetails] = useState({
         name: "",
@@ -20,34 +23,100 @@ function SignUpPage() {
         c_password: "",
         profile_pic: ""
     })
+    console.log(editorRef)
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
 
-    const PostDetails = (pics) => {
-
-        setloading(true)
-
-        if (pics.type === "image/png" || pics.type === "image/gif" || pics.type === "image/jpeg" || pics.type === "image/jpg") {
-            const data = new FormData();
-
-            data.append("file", pics);
-            data.append("upload_preset", "swifttalk");
-            data.append("cloud_name", "dxhaelva2");
-
-            fetch("https://api.cloudinary.com/v1_1/dxhaelva2/image/upload", {
-                method: "POST",
-                body: data
-            }).then((res) => {
-                return res.json();
-            }).then((data) => {
-                setUserDetails({ ...UserDetails, profile_pic: data.url.toString() })
-            }).catch(err => {
-                console.log(err);
+        if (file.type !== 'image/png' && file.type !== 'image/gif' && file.type !== 'image/jpeg' && file.type !== 'image/jpg') {
+            toast.error('Please select a valid image (png, gif, jpeg, or jpg).', {
+                position: "top-right",
+                // ... Other toast options ...
             });
-
+            return;
         }
-        setTimeout(() => {
-            setloading(false)
-        }, 1000);
+
+        setPics(file);
+        console.log(editorRef)
+        setEditor(editorRef.current)
     };
+
+    // const handleCrop = () => {
+    //     if (editor) {
+    //         const canvas = editor.getImageScaledToCanvas();
+    //         const dataURL = canvas.toDataURL();
+    //         setUserDetails({ ...UserDetails, profile_pic: dataURL });
+    //     }
+    // };
+
+    // const PostDetails = (pics) => {
+
+    //     setloading(true)
+
+    //     if (Pics.type === "image/png" || Pics.type === "image/gif" || Pics.type === "image/jpeg" || Pics.type === "image/jpg") {
+    //         const data = new FormData();
+
+    //         data.append("file", Pics);
+    //         data.append("upload_preset", "swifttalk");
+    //         data.append("cloud_name", "dxhaelva2");
+
+    //         fetch("https://api.cloudinary.com/v1_1/dxhaelva2/image/upload", {
+    //             method: "POST",
+    //             body: data
+    //         }).then((res) => {
+    //             return res.json();
+    //         }).then((data) => {
+    //             setUserDetails({ ...UserDetails, profile_pic: data.url.toString() })
+    //         }).catch(err => {
+    //             console.log(err);
+    //         });
+
+    //     }
+    //     setTimeout(() => {
+    //         setloading(false)
+    //     }, 1000);
+    // };
+
+    const handleCrop = async () => {
+
+        console.log(editorRef.current)
+        
+        // if (editor) { console.log(editor);
+        //     const canvas = editor.getImageScaledToCanvas();
+        //     const dataURL = canvas.toDataURL();
+
+        //     // Convert the data URL to a Blob object
+        //     const blob = await fetch(dataURL).then((res) => res.blob());
+            
+        //     if (blob.type === "image/png" || blob.type === "image/gif" || blob.type === "image/jpeg" || blob.type === "image/jpg") {
+        //         const data = new FormData();
+
+        //         data.append("file", blob);
+        //         data.append("upload_preset", "swifttalk");
+        //         data.append("cloud_name", "dxhaelva2");
+
+        //         try {
+        //             const response = await fetch("https://api.cloudinary.com/v1_1/dxhaelva2/image/upload", {
+        //                 method: "POST",
+        //                 body: data
+        //             })
+
+        //             if (response.ok) {
+        //                 const cloudinaryData = await response.json();
+        //                 setUserDetails({ ...UserDetails, profile_pic: cloudinaryData.url.toString() });
+        //                 console.error("Uploaded");
+        //             } else {
+        //                 console.error("Cloudinary upload failed");
+        //             }
+        //         } catch (err) {
+        //             console.error(err);
+        //         }
+        //     } else {
+        //         console.error("Invalid image format");
+        //     }
+        // }
+    };
+
 
     const handleInput = (e) => {
         let value = e.target.value
@@ -152,7 +221,7 @@ function SignUpPage() {
         }, 2000);
     }
 
-    console.log(UserDetails)
+    
 
 
     return (
@@ -190,10 +259,32 @@ function SignUpPage() {
                         <input type="text" className='w-full h-full rounded-full outline-none px-5 focus:bg-cyan-100 bg-slate-200' name='c_password' onChange={handleInput} value={UserDetails.c_password} placeholder='Enter Your Password' />
                     </div>
                 </div>
-                <div className='w-full h-[70px] mb-8'>
+                {/* <div className='w-full h-[70px] mb-8'>
                     <div className='w-full h-[40px]'>
                         Upload Your Image <input type="file" accept="image/png, image/jpeg, image/jpg, image/gif" onChange={(e) => { PostDetails(e.target.files[0]); }} />
                     </div>
+                </div> */}
+                <div className='w-full h-[70px] mb-8'>
+                    <div className='w-full h-[40px]'>
+                        Upload Your Image <input type="file" accept="image/png, image/jpeg, image/jpg, image/gif" onChange={handleImageChange} />
+                    </div>
+                    {Pics && (
+                        <div className="w-full h-auto">
+                            <AvatarEditor
+                                ref={editorRef}
+                                image={Pics}
+                                width={200}
+                                height={200}
+                                border={50}
+                                color={[255, 255, 255, 0.6]}
+                                scale={1.2}
+                                rotate={0}
+                                crossOrigin="anonymous"
+                                className="avatar-editor"
+                            />
+                            <button onClick={handleCrop}>Crop</button>
+                        </div>
+                    )}
                 </div>
 
                 <div className='w-full h-[40px] mb-5'>

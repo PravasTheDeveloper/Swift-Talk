@@ -81,8 +81,8 @@ function ChatPage() {
 
   return (
     <>
-      <div className='w-full h-screen bg-slate-900 flex flex-col py-5 px-10 2xl:px-0 '>
-        <div className='2xl:container relative  mx-auto w-full h-full bg-slate-800 rounded-lg flex-col flex overflow-hidden'>
+      <div className='w-full h-screen bg-slate-900 flex flex-col justify-center px-10 2xl:px-0 '>
+        <div className='2xl:container relative  mx-auto w-full h-[90%] bg-slate-800 rounded-lg flex-col flex overflow-hidden'>
 
           {/* Navigation Penel */}
           <div className='w-full h-[60px] relative bg-slate-700 z-50 border-slate-900 border-b flex'>

@@ -46,3 +46,24 @@ body {
 .GroupChatCreate::-webkit-scrollbar-thumb:hover {
   background: #cbd5e1;
 }
+
+.Show__Chatting__Data::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+.Show__Chatting__Data::-webkit-scrollbar-track {
+  background: transparent;
+  
+}
+ 
+/* Handle */
+.Show__Chatting__Data::-webkit-scrollbar-thumb {
+  background: #64748b5b; 
+  border-radius: 100px;
+}
+
+/* Handle on hover */
+.Show__Chatting__Data::-webkit-scrollbar-thumb:hover {
+  background: #555; 
+}
