@@ -6,9 +6,13 @@ import { useDispatch, useSelector } from 'react-redux'
 import { closeSearchSlider, openCreateGroup } from '../redux/SliderRedux'
 import { MdOutlineManageAccounts } from "react-icons/md"
 import Avatar from 'react-avatar'
+import Swal from 'sweetalert2'
+import { useNavigate } from 'react-router-dom'
 
 
 function NavigationPenel() {
+
+    const navigate = useNavigate()
 
     const [PersonTable, setPersonTable] = useState(false)
 
@@ -17,8 +21,33 @@ function NavigationPenel() {
     const dispatch = useDispatch()
 
     useEffect(() => {
-
+        console.log(UserData.status)
     }, [])
+
+    const handleLogout = async () => {
+        const userId = UserData._id
+        const response = await fetch(
+            '/api/logout',
+            {
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    userId
+                })
+            }
+        );
+        if (response.status === 200) {
+            navigate("/")
+        } else if (response.status) {
+            Swal.fire(
+                'Ivalid',
+                'Ivalid Logout',
+                'error'
+            )
+        }
+    }
 
     // console.log()
 
@@ -28,7 +57,7 @@ function NavigationPenel() {
                 <div className='w-full h-full flex justify-between items-center px-5'>
                     <div className="relative">
                         <div className="relative">
-                            <img className="w-10 h-10 rounded-full" src="https://flowbite.com/docs/images/people/profile-picture-5.jpg" alt="" />
+                            <img className="w-10 h-10 rounded-full" src={UserData.profile_pic} alt="" />
                             <span className="bottom-0 left-7 absolute  w-3.5 h-3.5 bg-green-400 border-2 border-white dark:border-gray-800 rounded-full"></span>
                         </div>
                     </div>
@@ -74,7 +103,7 @@ function NavigationPenel() {
                                 <div className='text-2xl'>
                                     <HiLogout />
                                 </div>
-                                <div>
+                                <div onClick={handleLogout}>
                                     Log Out
                                 </div>
                             </div>

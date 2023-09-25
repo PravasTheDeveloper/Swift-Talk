@@ -33,6 +33,7 @@ const userSignUp = async (req, res) => {
                     })
 
                     res.status(200).json({ messege: "Sign Up Successful" })
+
                 }
 
             }
@@ -56,14 +57,15 @@ const userLogIn = async (req, res) => {
 
             if (userLogin) {
                 const isMatch = await bcrypt.compare(password, userLogin.password);
-                const token = await userLogin.generateAuthToken();
 
-                const cookie = res.cookie("jwtoken", token, {
-                    expires: new Date(Date.now() + 25892000000),
-                    httpOnly: true
-                })
 
                 if (isMatch) {
+                    const token = await userLogin.generateAuthToken();
+
+                    const cookie = res.cookie("jwtoken", token, {
+                        expires: new Date(Date.now() + 25892000000),
+                        httpOnly: true
+                    })
                     res.status(200).json({ messege: "LOGIN SUCCESSFULL" });
                 } else {
                     res.status(400).json({ error: "Invalid Crediential !" });
@@ -81,9 +83,7 @@ const userLogIn = async (req, res) => {
 }
 
 const userDetails = async (req, res) => {
-    res.status(400).json({ messege: "Something went Wrong" })
     res.status(200).send(req.rootUser)
-
 }
 
 // Find User
@@ -112,7 +112,8 @@ const findUserChatting = async (req, res) => {
         const findUser = await Chat.find({
             users: { $elemMatch: { $eq: req.id } },
         })
-            .populate("users", "-password -tokens");
+            .populate("users", "-password -tokens")
+            .populate("letestMessege" , "content")
 
 
 
@@ -123,5 +124,10 @@ const findUserChatting = async (req, res) => {
     }
 }
 
+const userLogout = async (req, res) => {
+    res.clearCookie('jwtoken');
+    res.status(200).json({ message: 'Logout successful' });
+}
 
-module.exports = { userSignUp, userLogIn, findUser, findUserChatting, userDetails }
+
+module.exports = { userSignUp, userLogIn, findUser, findUserChatting, userDetails, userLogout }

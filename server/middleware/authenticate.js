@@ -6,7 +6,7 @@ const authenticate = async (req, res, next) => {
         const token = req.cookies.jwtoken;
         if (token) {
             const verifyToken = jwt.verify(token, process.env.SECRET_KEY || "THISISOURDEVINFOWEBSITEDEVELOPBYPRAVASCHANDRASARKARLOVEYOUALL");
-            
+
             const rootUser = await AllUser.findOne({ _id: verifyToken._id, "tokens.token": token })
 
             if (!rootUser) {
@@ -17,7 +17,7 @@ const authenticate = async (req, res, next) => {
                 req.id = rootUser._id;
                 req.userName = rootUser.name;
                 req.profile_pic = rootUser.profile_pic;
-                
+
                 next();
             }
         } else {
@@ -25,8 +25,8 @@ const authenticate = async (req, res, next) => {
         }
 
     } catch (err) {
-        res.status(401).json("No thoken provided");
-        // console.log(err)
+        res.status(401).json([]);
+        console.log(err)
     }
 }
 

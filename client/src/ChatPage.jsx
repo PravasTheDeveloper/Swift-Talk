@@ -10,14 +10,19 @@ import { fetchUserDetails } from './components/redux/UserRedux'
 import { fetchChatsAsync } from './components/redux/ChattingRedux'
 import SliderSearchPerson from './components/SliderSearchPerson/SliderSearchPerson'
 import SliderCreateGroup from './components/SliderCreateGroup/SliderCreateGroup';
+import { useNavigate } from 'react-router-dom';
+import HomePageLoading from './HomePageLoading';
 
 function ChatPage() {
 
+  const navigate = useNavigate()
   const SearchSlider = useSelector((state) => state.slider.searchSlider)
   const Chattingloading = useSelector((state) => state.chatting.loading)
   const createGroupStatus = useSelector((state) => state.slider.createGroup)
+  const UserData = useSelector((state) => state.userdetails.userdata)
+  // const loading = useSelector((state) => state.userdetails.loading)
   const [Users, setUsers] = useState([])
-
+  const [loading, setloading] = useState(true)
   const dispatch = useDispatch()
 
   const SearchPerson = async (event) => {
@@ -75,73 +80,100 @@ function ChatPage() {
   }
 
   useEffect(() => {
-    dispatch(fetchUserDetails())
+    setloading(true)
+    // dispatch(fetchUserDetails())
     dispatch(fetchChatsAsync())
+    dispatch(fetchUserDetails())
+      .then((result) => {
+        if (result.payload.Status === 401) {
+          // console.log(result.payload)
+
+          setTimeout(() => {
+            navigate('/');
+            setloading(false)
+          }, 2000);
+        } else {
+          setTimeout(() => {
+            setloading(false)
+          }, 2000);
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching user details:', error);
+      });
   }, [])
 
   return (
     <>
       <div className='w-full h-screen bg-slate-900 flex flex-col justify-center px-10 2xl:px-0 '>
-        <div className='2xl:container relative  mx-auto w-full h-[90%] bg-slate-800 rounded-lg flex-col flex overflow-hidden'>
+        {
+          loading === true ?
+            <HomePageLoading />
+            :
 
-          {/* Navigation Penel */}
-          <div className='w-full h-[60px] relative bg-slate-700 z-50 border-slate-900 border-b flex'>
-            <NavigationPenel />
-          </div>
+            <div className='2xl:container relative  mx-auto w-full h-[90%] bg-slate-800 rounded-lg flex-col flex overflow-hidden'>
 
-          {/* SideBar And Chatting Feild */}
-
-          <SliderSearchPerson />
-
-          {/* Search Option People */}
-
-          <div className={`h-full w-[350px] absolute  z-50 ${SearchSlider === true ? "left-0" : "left-[-400px]"} duration-300 flex flex-col`}>
-            <div className='w-full h-[60px] relative bg-slate-700 border-slate-900 border-b flex justify-center items-center px-5'>
-              <div className='text-2xl text-white w-10 h-10 flex justify-center items-center left-0 cursor-pointer' onClick={() => { dispatch(closeSearchSlider()); setUsers([]) }}>
-                <IoIosArrowBack />
+              {/* Navigation Penel */}
+              <div className='w-full h-[60px] relative bg-slate-700 z-50 border-slate-900 border-b flex'>
+                <NavigationPenel />
               </div>
-              <input type="text" className='h-[40px] w-full rounded bg-slate-500 px-2 text-sm text-white outline-none' onChange={SearchPerson} placeholder='Search People' />
-            </div>
-            <div className='w-full flex-1 bg-slate-700 p-10'>
-              <div className='w-full h-full'>
-                {
-                  Users.map((data, index) => {
-                    return (
-                      <div className='w-full h-16 bg-slate-500 flex items-center px-3 mb-2' onClick={() => { addPersonChat(data._id) }}>
-                        <div className='h-[40px] rounded-full overflow-hidden w-[40px] mr-3'>
-                          {data.profile_pic.length > 0 ? <img src={data.profile_pic} alt="" /> : <Avatar size="40" style={{ fontSize: 40, borderRadius: 100 }} color={Avatar.getRandomColor('sitebase', ['red', 'green', 'blue'])} name={data.name} />}
-                        </div>
-                        <dir className="text-white">
-                          <div className='font-bold'>
-                            {data.name}
+
+              {/* SideBar And Chatting Feild */}
+
+              <SliderSearchPerson />
+
+              {/* Search Option People */}
+
+              <div className={`h-full w-[350px] absolute  z-50 ${SearchSlider === true ? "left-0" : "left-[-400px]"} duration-300 flex flex-col`}>
+                <div className='w-full h-[60px] relative bg-slate-700 border-slate-900 border-b flex justify-center items-center px-5'>
+                  <div className='text-2xl text-white w-10 h-10 flex justify-center items-center left-0 cursor-pointer' onClick={() => { dispatch(closeSearchSlider()); setUsers([]) }}>
+                    <IoIosArrowBack />
+                  </div>
+                  <input type="text" className='h-[40px] w-full rounded bg-slate-500 px-2 text-sm text-white outline-none' onChange={SearchPerson} placeholder='Search People' />
+                </div>
+                <div className='w-full flex-1 bg-slate-700 p-10'>
+                  <div className='w-full h-full'>
+                    {
+                      Users.map((data, index) => {
+                        return (
+                          <div className='w-full h-16 bg-slate-500 flex items-center px-3 mb-2' onClick={() => { addPersonChat(data._id) }}>
+                            <div className='h-[40px] rounded-full overflow-hidden w-[40px] mr-3'>
+                              {data.profile_pic.length > 0 ? <img src={data.profile_pic} alt="" /> : <Avatar size="40" style={{ fontSize: 40, borderRadius: 100 }} color={Avatar.getRandomColor('sitebase', ['red', 'green', 'blue'])} name={data.name} />}
+                            </div>
+                            <dir className="text-white">
+                              <div className='font-bold'>
+                                {data.name}
+                              </div>
+                              <div className='text-sm'>
+                                {data.email}
+                              </div>
+                            </dir>
                           </div>
-                          <div className='text-sm'>
-                            {data.email}
-                          </div>
-                        </dir>
-                      </div>
-                    )
-                  })
-                }
+                        )
+                      })
+                    }
+                  </div>
+                </div>
+
+                <div className={`w-full h-full scroll_page_bg_style absolute left-0 top-0 flex justify-center items-center ${Chattingloading === false ? "hidden" : "none"}`}>
+                  <RotatingLines
+                    strokeColor="#fff"
+                    strokeWidth="5"
+                    animationDuration="0.5"
+                    width="100"
+                    visible={true}
+                  />
+                </div>
               </div>
-            </div>
-            
-            <div className={`w-full h-full scroll_page_bg_style absolute left-0 top-0 flex justify-center items-center ${Chattingloading === false ? "hidden" : "none"}`}>
-              <RotatingLines
-                strokeColor="#fff"
-                strokeWidth="5"
-                animationDuration="0.5"
-                width="100"
-                visible={true}
-              />
-            </div>
-          </div>
 
-          <div className={`h-full bg-slate-700 w-[350px] absolute z-50 ${createGroupStatus === true ? "left-0" : "left-[-400px]" }  duration-300 flex flex-col border-r border-slate-900`}>
-            <SliderCreateGroup />
-          </div>
+              <div className={`h-full bg-slate-700 w-[350px] absolute z-50 ${createGroupStatus === true ? "left-0" : "left-[-400px]"}  duration-300 flex flex-col border-r border-slate-900`}>
+                <SliderCreateGroup />
+              </div>
 
-        </div>
+            </div>
+
+
+        }
 
       </div>
     </>

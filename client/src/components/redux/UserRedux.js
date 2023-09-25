@@ -13,6 +13,10 @@ export const fetchUserDetails = createAsyncThunk(
 
             const Status = response.status;
             const User = await response.json();
+
+            // if(!User){
+            
+            // }
             
             return { User, Status };
         } catch (error) {

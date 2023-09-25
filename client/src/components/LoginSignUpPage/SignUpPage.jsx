@@ -9,112 +9,81 @@ import AvatarEditor from 'react-avatar-editor';
 
 function SignUpPage() {
 
-    const navigate = useNavigate()
 
-    const [Pics, setPics] = useState()
-    const [loading, setloading] = useState(false)
-    const [editor, setEditor] = useState(null);
-    const editorRef = useRef(null);
+    const navigate = useNavigate();
+
+    const [loading, setloading] = useState(false);
+    const [image, setImage] = useState(null);
+    const [ProfilePicBar, setProfilePicBar] = useState(false)
+    const editorRef = React.createRef();
 
     const [UserDetails, setUserDetails] = useState({
-        name: "",
-        email: "",
-        password: "",
-        c_password: "",
-        profile_pic: ""
-    })
-    console.log(editorRef)
+        name: '',
+        email: '',
+        password: '',
+        c_password: '',
+        profile_pic: '',
+    });
+
     const handleImageChange = (e) => {
+        setProfilePicBar(true)
         const file = e.target.files[0];
-        if (!file) return;
-
-        if (file.type !== 'image/png' && file.type !== 'image/gif' && file.type !== 'image/jpeg' && file.type !== 'image/jpg') {
-            toast.error('Please select a valid image (png, gif, jpeg, or jpg).', {
-                position: "top-right",
-                // ... Other toast options ...
-            });
-            return;
-        }
-
-        setPics(file);
-        console.log(editorRef)
-        setEditor(editorRef.current)
+        setImage(URL.createObjectURL(file));
     };
 
-    // const handleCrop = () => {
-    //     if (editor) {
-    //         const canvas = editor.getImageScaledToCanvas();
-    //         const dataURL = canvas.toDataURL();
-    //         setUserDetails({ ...UserDetails, profile_pic: dataURL });
-    //     }
-    // };
 
-    // const PostDetails = (pics) => {
+    const PostDetails = async (pics) => {
+        try {
+            setloading(true);
 
-    //     setloading(true)
+            const canvas = editorRef.current.getImage();
+            const blobPromise = new Promise((resolve) => {
+                canvas.toBlob((blob) => {
+                    resolve(blob);
+                });
+            });
 
-    //     if (Pics.type === "image/png" || Pics.type === "image/gif" || Pics.type === "image/jpeg" || Pics.type === "image/jpg") {
-    //         const data = new FormData();
+            const blob = await blobPromise;
 
-    //         data.append("file", Pics);
-    //         data.append("upload_preset", "swifttalk");
-    //         data.append("cloud_name", "dxhaelva2");
+            // Create a File object from the Blob
+            const canvasFile = new File([blob], 'canvas_image.png', {
+                type: 'image/png', // Set the appropriate MIME type
+            });
 
-    //         fetch("https://api.cloudinary.com/v1_1/dxhaelva2/image/upload", {
-    //             method: "POST",
-    //             body: data
-    //         }).then((res) => {
-    //             return res.json();
-    //         }).then((data) => {
-    //             setUserDetails({ ...UserDetails, profile_pic: data.url.toString() })
-    //         }).catch(err => {
-    //             console.log(err);
-    //         });
+            const data = new FormData();
+            data.append('file', canvasFile);
+            data.append('upload_preset', 'swifttalk');
+            data.append('cloud_name', 'dxhaelva2');
 
-    //     }
-    //     setTimeout(() => {
-    //         setloading(false)
-    //     }, 1000);
-    // };
+            const response = await fetch(
+                'https://api.cloudinary.com/v1_1/dxhaelva2/image/upload',
+                {
+                    method: 'POST',
+                    body: data,
+                }
+            );
 
-    const handleCrop = async () => {
+            if (response.status === 200) {
+                const cloudinaryData = await response.json();
+                setUserDetails({
+                    ...UserDetails,
+                    profile_pic: cloudinaryData.url.toString(),
+                });
+                // setTimeout(() => {
 
-        console.log(editorRef.current)
-        
-        // if (editor) { console.log(editor);
-        //     const canvas = editor.getImageScaledToCanvas();
-        //     const dataURL = canvas.toDataURL();
-
-        //     // Convert the data URL to a Blob object
-        //     const blob = await fetch(dataURL).then((res) => res.blob());
-            
-        //     if (blob.type === "image/png" || blob.type === "image/gif" || blob.type === "image/jpeg" || blob.type === "image/jpg") {
-        //         const data = new FormData();
-
-        //         data.append("file", blob);
-        //         data.append("upload_preset", "swifttalk");
-        //         data.append("cloud_name", "dxhaelva2");
-
-        //         try {
-        //             const response = await fetch("https://api.cloudinary.com/v1_1/dxhaelva2/image/upload", {
-        //                 method: "POST",
-        //                 body: data
-        //             })
-
-        //             if (response.ok) {
-        //                 const cloudinaryData = await response.json();
-        //                 setUserDetails({ ...UserDetails, profile_pic: cloudinaryData.url.toString() });
-        //                 console.error("Uploaded");
-        //             } else {
-        //                 console.error("Cloudinary upload failed");
-        //             }
-        //         } catch (err) {
-        //             console.error(err);
-        //         }
-        //     } else {
-        //         console.error("Invalid image format");
-        //     }
-        // }
+                // }, 2000);
+                console.log('Image uploaded successfully.');
+            } else {
+                const errorData = await response.json();
+                console.error('Cloudinary upload failed:', errorData.message);
+            }
+            // console.log(UserDetails)
+        } catch (err) {
+            console.error('Error:', err);
+        } finally {
+            setProfilePicBar(false)
+            setloading(false);
+        }
     };
 
 
@@ -176,6 +145,8 @@ function SignUpPage() {
                             })
                         })
 
+                        // const data = response.json()
+
                         if (response.status === 200) {
                             Swal.fire(
                                 'REGISTERED',
@@ -183,7 +154,7 @@ function SignUpPage() {
                                 'success'
                             )
                             // const data = response.json
-                            localStorage.setItem("userInfo", JSON.stringify(data));
+                            // localStorage.setItem("userInfo", JSON.stringify(data));
                             navigate("/chat")
                         } else if (response.status === 402) {
                             toast.warn('User already Exisist', {
@@ -221,7 +192,7 @@ function SignUpPage() {
         }, 2000);
     }
 
-    
+
 
 
     return (
@@ -261,30 +232,29 @@ function SignUpPage() {
                 </div>
                 {/* <div className='w-full h-[70px] mb-8'>
                     <div className='w-full h-[40px]'>
-                        Upload Your Image <input type="file" accept="image/png, image/jpeg, image/jpg, image/gif" onChange={(e) => { PostDetails(e.target.files[0]); }} />
+                        Upload Your Image <input type="file" accept="image/png, image/jpeg, image/jpg, image/gif" onChange={(e) => {PostDetails(e.target.files[0])}} />
                     </div>
                 </div> */}
                 <div className='w-full h-[70px] mb-8'>
                     <div className='w-full h-[40px]'>
                         Upload Your Image <input type="file" accept="image/png, image/jpeg, image/jpg, image/gif" onChange={handleImageChange} />
                     </div>
-                    {Pics && (
-                        <div className="w-full h-auto">
+                    <div className={`w-full h-full scroll_page_bg_style absolute top-0 left-0 ${ProfilePicBar ? "flex" : "hidden"} justify-center items-center flex-col`}>
+                        {image && (
+
                             <AvatarEditor
                                 ref={editorRef}
-                                image={Pics}
-                                width={200}
-                                height={200}
-                                border={50}
-                                color={[255, 255, 255, 0.6]}
-                                scale={1.2}
-                                rotate={0}
-                                crossOrigin="anonymous"
-                                className="avatar-editor"
+                                image={image}
+                                width={300}
+                                height={300}
+                                border={10}
+                                color={[255, 255, 255, 0.6]} // Border color and opacity
+                                scale={1} // Zoom level
                             />
-                            <button onClick={handleCrop}>Crop</button>
-                        </div>
-                    )}
+
+                        )}
+                        {image && <button onClick={PostDetails} className='bg-cyan-500 mt-10 text-lg px-10 py-2 rounded-full'>Save</button>}
+                    </div>
                 </div>
 
                 <div className='w-full h-[40px] mb-5'>
@@ -312,3 +282,5 @@ function SignUpPage() {
 }
 
 export default SignUpPage
+
+

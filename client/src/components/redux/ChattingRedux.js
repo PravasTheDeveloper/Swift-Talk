@@ -13,7 +13,7 @@ export const fetchChatsAsync = createAsyncThunk(
 
             const Status = response.status;
             const Chats = await response.json();
-            
+
             return { Chats, Status };
         } catch (error) {
             console.log(error);
@@ -33,6 +33,16 @@ const chattingSlice = createSlice({
         openSearchSliders: (state) => {
             state.status = 200
         },
+
+        addLatestChatting: (state, action) => {
+
+            const chatId = action.payload.selectedChatCompare;
+            const content = action.payload.newMessageReceived.content
+
+            const foundChat = state.data.find((data) => data._id === chatId);
+
+            foundChat.letestMessege.content = content
+        }
     },
     extraReducers: (builder) => {
         builder
@@ -42,7 +52,7 @@ const chattingSlice = createSlice({
             .addCase(fetchChatsAsync.fulfilled, (state, action) => {
                 state.loading = false;
                 state.status = action.payload.Status;
-                state.data = action.payload.Chats; 
+                state.data = action.payload.Chats;
             })
             .addCase(fetchChatsAsync.rejected, (state) => {
                 state.loading = false;
@@ -51,6 +61,6 @@ const chattingSlice = createSlice({
     },
 });
 
-export const { openSearchSliders } = chattingSlice.actions;
+export const { openSearchSliders, addLatestChatting } = chattingSlice.actions;
 
 export default chattingSlice.reducer;

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from "react-redux"
 import { closeSearchSlider, openSearchSlider } from "../redux/SliderRedux"
 import Avatar from "react-avatar"
-import { fetchChatsAsync } from "../redux/ChattingRedux"
+import { addLatestChatting, fetchChatsAsync } from "../redux/ChattingRedux"
 import { RotatingLines } from 'react-loader-spinner';
 // import { fetchMessege, selectChattingOption, addSoketMessege } from "../redux/MessegeRedux"
 import { TbMessageCircleOff } from "react-icons/tb"
@@ -17,15 +17,14 @@ const soket = io("http://localhost:5000")
 function SliderSearchPerson() {
 
     var selectedChatCompare;
-    // const messegeStatus = useSelector((state) => state.messege.status)
+
     const ChattingData = useSelector((state) => state.chatting.data)
     const Chattingloading = useSelector((state) => state.chatting.loading)
-    // const messegeData = useSelector((state) => state.messege.data)
-    // const ChattingDetails = useSelector((state) => state.messege.messegeSelect)
+
     const UserData = useSelector((state) => state.userdetails.userdata)
     const [content, setcontent] = useState("")
     const dispatch = useDispatch()
-    // const chatId = ChattingDetails._id
+
     const [SoketConnected, setSoketConnected] = useState(false)
     const [SelectedChatMessege, setSelectedChatMessege] = useState([])
 
@@ -60,8 +59,9 @@ function SliderSearchPerson() {
     useEffect(() => {
         dispatch(fetchChatsAsync())
         soket.emit("setup", UserData)
-        soket.on("connection", () => setSoketConnected(true))
-    }, [])
+        soket.on("connection", () => console.log(`connect`))
+        soket.on("disconnected", () => console.log(`disconnect`))
+    }, [soket])
 
     const SentChattingData = async () => {
         const chatId = SelectedChat._id
@@ -79,7 +79,8 @@ function SliderSearchPerson() {
 
         const status = response.status
         const data = await response.json()
-        console.log(data)
+
+        // console.log(data)
         soket.emit("new messege", data)
 
         if (status === 200) {
@@ -99,6 +100,7 @@ function SliderSearchPerson() {
                 console.log(`Notificate :::: `, newMessageReceived);
             } else {
                 setSelectedChatMessege((prev) => [...prev, newMessageReceived])
+                dispatch(addLatestChatting({ selectedChatCompare, newMessageReceived }))
 
                 if (newMessageReceived.sender !== UserData._id) {
                     setDataDispatched(true);
@@ -107,13 +109,13 @@ function SliderSearchPerson() {
         };
 
         soket.on("messege recieved", handleNewMessage);
-
+        soket.on("disconnect", () => console.log(`disconnect`))
 
         return () => {
             soket.off("messege recieved", handleNewMessage);
         };
     }, [soket, selectedChatCompare]);
-    console.log(SelectedChatMessege)
+    // console.log(ChattingData)
     return (
         <>
             <div className='flex-1 h-full relative flex overflow-hidden'>
@@ -128,8 +130,12 @@ function SliderSearchPerson() {
                                     return (
                                         <div className='w-full h-16 bg-slate-500 flex items-center px-2 mb-4 cursor-pointer hover:bg-slate-900 duration-200' key={index} onClick={() => { ChattingHandle(data) }}>
                                             <div className=''>
-                                                <div className='h-[40px] rounded-full overflow-hidden w-[40px] mr-3'>
-                                                    <Avatar size="40" style={{ fontSize: 40, borderRadius: 100 }} color={Avatar.getRandomColor('sitebase', ['red', 'green', 'blue'])} name={data.chatName.length > 0 ? data.chatName : data.users[0]._id === UserData._id ? data.users[1].name : data.users[0].name} />
+                                                <div className='h-[40px] rounded-full w-[40px] mr-3'>
+                                                    {/* <img  /> */}
+                                                    <div className="relative">
+                                                        <img className="w-10 h-10 rounded-full" src={data.users[0]._id === UserData._id ? data.users[1].profile_pic : data.users[0].profile_pic} alt="" />
+                                                        <span className="bottom-0 left-7 absolute  w-3.5 h-3.5 bg-green-400 border-2 border-white dark:border-gray-800 rounded-full"></span>
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div>
@@ -139,7 +145,7 @@ function SliderSearchPerson() {
                                                     }
                                                 </div>
                                                 <div className='text-white text-sm'>
-                                                    Hei man how are you
+                                                    {data.letestMessege.content}
                                                 </div>
                                             </div>
                                         </div>

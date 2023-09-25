@@ -1,7 +1,7 @@
 const express = require("express")
 const router = express.Router()
 
-const { userSignUp, userLogIn, findUser, findUserChatting, userDetails } = require("../controller/userController")
+const { userSignUp, userLogIn, findUser, findUserChatting, userDetails, userLogout } = require("../controller/userController")
 const authenticate = require("../middleware/authenticate")
 // const User = require("../models/UserSchema")
 const {
@@ -26,7 +26,7 @@ router.post("/api/register", userSignUp)
 router.post("/api/login", userLogIn)
 router.get("/api/user", authenticate, findUser)
 router.get("/api/userchatting", authenticate, findUserChatting)
-
+router.post("/api/logout" ,userLogout)
 
 // All Chatting Routes
 
@@ -40,7 +40,7 @@ router.put("/api/removeGroup", removeGroupControl)
 
 // Messeges Chatting Routes
 
-router.post("/api/messege", authenticate ,sendMessege)
+router.post("/api/messege", authenticate, sendMessege)
 router.get("/api/messege/:chatId", authenticate, fetchAllMessege)
 
 
